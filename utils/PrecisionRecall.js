@@ -35,6 +35,71 @@ PrecisionRecall.prototype = {
 	},
 
 	/**
+		 * Record the result of a new classes experiment per labels.
+		 *
+		 * @param expectedClasses - the expected set of classes (as an array or a hash).
+		 * @param actualClasses   - the actual   set of classes (as an array or a hash).
+		 * @return an array of explanations "FALSE POSITIVE", "FALSE NEGATIVE", and maybe also "TRUE POSITIVE"
+		 */
+
+		addCasesLabels: function (expectedClasses, actualClasses ) {
+			var explanations = [];
+
+			actualClasses = hash.normalized(actualClasses);
+			expectedClasses = hash.normalized(expectedClasses);
+
+			var allTrue = true;
+
+			if (!(Object.keys(expectedClasses)[0] in this.confusion)) 
+				this.confusion[Object.keys(expectedClasses)[0]] = {}
+
+			if (!(Object.keys(actualClasses)[0] in this.confusion[Object.keys(expectedClasses)[0]])) 
+				this.confusion[Object.keys(expectedClasses)[0]][Object.keys(actualClasses)[0]] = 0
+
+			this.confusion[Object.keys(expectedClasses)[0]][Object.keys(actualClasses)[0]] += 1 
+
+			for (var actualClass in actualClasses) {
+
+				if (!(actualClass in this.confusion)) 
+					this.confusion[actualClass]={}
+
+				if (!(actualClass in this.labels)) {
+					this.labels[actualClass]={}
+					this.labels[actualClass]['TP']=0
+					this.labels[actualClass]['FP']=0
+					this.labels[actualClass]['FN']=0
+					}
+
+				if (actualClass in expectedClasses) { 
+					this.labels[actualClass]['TP'] += 1 
+
+				} else {
+					this.labels[actualClass]['FP'] += 1
+				}
+			}
+			for (var expectedClass in expectedClasses) {
+
+				if (!(expectedClass in this.labels)) {
+					this.labels[expectedClass]={}
+					this.labels[expectedClass]['TP']=0
+					this.labels[expectedClass]['FP']=0
+					this.labels[expectedClass]['FN']=0
+					}
+
+				if (!(expectedClass in actualClasses)) {
+					this.labels[expectedClass]['FN'] += 1 
+				}
+			}
+		},
+
+	/**
+	 * @return the full set of statistics for the most recent experiment.
+	 */
+	fullStats: function() { 
+		return this;
+	},
+
+	/**
 	 * Record the result of a new classes experiment.
 	 *
 	 * @param expectedClasses - the expected set of classes (as an array or a hash).
