@@ -32,7 +32,7 @@ exports.drawBasicTable = function(data, title) {
 }
 
 exports.drawTable = function(confusion, title) {
-  var table = new AsciiTable(title || 'Confustion Matrix');
+  var table = new AsciiTable(title || 'Confusion Matrix');
 
   var headings = [''];
   var matrix = [];
