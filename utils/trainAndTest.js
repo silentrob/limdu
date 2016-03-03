@@ -14,6 +14,7 @@ var list = require('limdu/utils/list');
 var async = require('async');
 var distance = require('./distance');
 var partitions = require('limdu/utils/partitions');
+var lo = require("lodash");
 
 /**
  * A short light-weight test function. Tests the given classifier on the given dataset, and 
@@ -721,6 +722,35 @@ var normalizeClasses = function (expectedClasses) {
   expectedClasses.sort();
   return expectedClasses;
 };
+
+// Given a set of results, merge the values together
+module.exports.mergeResults = function(resultSet) {
+  var numSets = resultSet.length;
+  var object = {};
+  var customizer = function(val1, val2) {
+    if (_.isNumber(val1) && _.isNumber(val2)) {
+      return val1 + val2;
+    }
+    if (lo.isPlainObject(val1) && lo.isPlainObject(val2)) {
+      return lo.mergeWith(val1, val2, customizer);
+    }
+  }
+  for (var i = 0; i < resultSet.length; i++) {
+    object = lo.mergeWith(object, resultSet[i], customizer);
+  }
+  
+  object.Accuracy = object.Accuracy / numSets;
+  object.macroPrecision = object.macroPrecision / numSets;
+  object.macroRecall = object.macroRecall / numSets;
+  object.macroF1 = object.macroF1 / numSets;
+  object.microPrecision = object.microPrecision / numSets;
+  object.microRecall = object.microRecall / numSets;
+  object.microF1 = object.microF1 / numSets;
+  object.HammingLoss = object.HammingLoss / numSets;
+  object.HammingGain = object.HammingGain / numSets;
+
+  return object;
+}
 
 // module.exports.testBatch_async = function(classifier, testSet, callback) {
 

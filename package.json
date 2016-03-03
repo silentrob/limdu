@@ -16,6 +16,7 @@
     "brain": "*",
     "graph-paths": "latest",
     "languagemodel": "latest",
+    "lodash": "^4.6.1",
     "sprintf": "*",
     "svm": "*",
     "temp": "*",
