@@ -15,6 +15,7 @@ var async = require('async');
 var distance = require('./distance');
 var partitions = require('limdu/utils/partitions');
 var lo = require("lodash");
+var traverse = require('traverse');
 
 /**
  * A short light-weight test function. Tests the given classifier on the given dataset, and 
@@ -726,6 +727,10 @@ var normalizeClasses = function (expectedClasses) {
 // Given a set of results, merge the values together
 module.exports.mergeResults = function(resultSet) {
   var numSets = resultSet.length;
+
+  var fixPercentage = ["Accuracy", "macroPrecision", "macroRecall", "macroF1", "microPrecision",
+  "microRecall", "microF1", "HammingLoss", "HammingGain", "Recall", "Precision", "F1" ]
+
   var object = {};
   var customizer = function(val1, val2) {
     if (_.isNumber(val1) && _.isNumber(val2)) {
@@ -739,19 +744,14 @@ module.exports.mergeResults = function(resultSet) {
     object = lo.mergeWith(object, resultSet[i], customizer);
   }
   
-  object.Accuracy = object.Accuracy / numSets;
-  object.macroPrecision = object.macroPrecision / numSets;
-  object.macroRecall = object.macroRecall / numSets;
-  object.macroF1 = object.macroF1 / numSets;
-  object.microPrecision = object.microPrecision / numSets;
-  object.microRecall = object.microRecall / numSets;
-  object.microF1 = object.microF1 / numSets;
-  object.HammingLoss = object.HammingLoss / numSets;
-  object.HammingGain = object.HammingGain / numSets;
+  traverse(object).forEach(function (value) {
+    if (fixPercentage.indexOf(this.key) !== -1) {
+      this.update(+((value / numSets).toFixed(3)));
+    }
+  });
 
   return object;
 }
-
 // module.exports.testBatch_async = function(classifier, testSet, callback) {
 
 //  console.log("test")
